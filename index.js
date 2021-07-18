@@ -28,23 +28,23 @@ const HID_MAP = {
         modifier: '000'
     },
     RIGHT: {
-        code: '069',
-        type: 'consumer',
+        code: '079',
+        type: 'keyboard',
         modifier: '000'
     },
     LEFT: {
-        code: '068',
-        type: 'consumer',
+        code: '080',
+        type: 'keyboard',
         modifier: '000'
     },
     DOWN: {
-        code: '067',
-        type: 'consumer',
+        code: '081',
+        type: 'keyboard',
         modifier: '000'
     },
     UP: {
-        code: '066',
-        type: 'consumer',
+        code: '082',
+        type: 'keyboard',
         modifier: '000'
     },
     BACK: {
@@ -238,9 +238,12 @@ class IRUSBDevice extends Device {
         this.responseQueue = [];
         this.socket.connect(port, ip, () => {
             this.connectedNotify(true);
+            this.interval = setInterval(() => this.updateState(), 5000);
             this.adapter.handleDeviceAdded(this);
         });
         this.socket.on('close', () => {
+            clearInterval(this.interval);
+            this.interval = undefined;
             this.connectedNotify(false);
         });
         this.socket.on('data', (data) => {
@@ -254,23 +257,22 @@ class IRUSBDevice extends Device {
             //TODO event for incoming IR
             console.log('Unexpected packet', data);
         });
-        this.interval = setTimeout(() => this.updateState(), 5000);
         this.updateState();
     }
 
     async updateState() {
         const playing = await this.sendCommand('GETPLAY');
         const app = await this.sendCommand('GETFG');
-        console.log(playing, app);
-        const isPlaying = playing === '1\r';
+        const isPlaying = playing === '1';
         this.findProperty('playing').setCachedValueAndNotify(isPlaying);
         this.findProperty('app').setCachedValueAndNotify(app);
         // app !== screensaver
-        this.findProperty('power').setCachedValueAndNotify(isPlaying && app);
+        this.findProperty('power').setCachedValueAndNotify(isPlaying || app);
     }
 
     destroy() {
         clearInterval(this.interval);
+        this.interval = undefined;
         this.socket.destroy();
     }
 
@@ -278,7 +280,7 @@ class IRUSBDevice extends Device {
         let pressType = long ? 'long' : 'short';
         const keyInfo = HID_MAP[keyName];
         const startCode = CONTROL_CODE[keyInfo.type][pressType];
-        return this.sendCommand(`HIDCODE${startCode}${keyInfo.code}${keyInfo.modifier}`);
+        return this.sendCommand(`HIDCODE${startCode}${keyInfo.modifier}${keyInfo.code}`);
     }
 
     sendCommand(command) {
@@ -296,6 +298,9 @@ class IRUSBDevice extends Device {
 
     reconnect(ip, port) {
         if(this.socket.readyState !== 'open') {
+            if(!this.interval) {
+                this.interval = setInterval(() => this.updateState(), 5000);
+            }
             this.socket.connect(port, ip, () => {
                 this.connectedNotify(true);
             });
