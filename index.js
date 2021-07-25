@@ -172,6 +172,7 @@ class IRUSBDevice extends Device {
     constructor(adapter, uuid, ip, port) {
         super(adapter, uuid);
         this.name = uuid;
+        this['@type'] = [ 'OnOffSwitch' ];
         this.socket = new net.Socket();
         this.socket.setEncoding('ascii');
         this.addProperty(new IRUSBProperty(this, 'power', {
