@@ -148,6 +148,9 @@ const CONTROL_CODE = {
 
 class IRUSBProperty extends Property {
     async setValue(value) {
+        if(typeof value !== 'boolean') {
+            throw new Error(`Invalid value type ${typeof value}. Expecting boolean.`);
+        }
         if(this.name === 'power') {
             if(value) {
                 return this.device.sendCommand('WAKE');
@@ -160,6 +163,8 @@ class IRUSBProperty extends Property {
             }
             return this.device.sendKey('PAUSE');
         }
+        this.setCachedValueAndNotify(value);
+        return value;
     }
 }
 
