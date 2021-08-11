@@ -3,7 +3,7 @@
     "id": "irusb-adapter",
     "name": "IrUSB",
     "short_name": "IrUSB",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Adapter for Video Lan IrUSB devices (Android TV, nVidia Shield with an adapter)",
     "homepage_url": "https://git.humanoids.be/freaktechnik/irusb-adapter",
     "license": "MIT",
