@@ -318,13 +318,13 @@ class IRUSBDevice extends Device {
      * @param {Action} action
      */
     async performAction(action) {
-        switch(action.getName()) {
+        switch(action.name) {
             case 'launch':
-                return this.sendCommand(`LAUNCH ${action.getInput()}`);
+                return this.sendCommand(`LAUNCH ${action.input}`);
             case 'remoteShort':
-                return this.sendKey(action.getInput(), false);
+                return this.sendKey(action.input, false);
             case 'remoteLong':
-                return this.sendKey(action.getInput(), true);
+                return this.sendKey(action.input, true);
             case 'cancelKeys':
                 return this.sendCommand('HIDCODE0000000');
         }
